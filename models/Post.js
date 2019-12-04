@@ -9,7 +9,7 @@ const postSchema = new Schema({
         required: [true, 'title must not be empty!']
     },
     description: {
-        type: Text,
+        type: String,
         required: [true, 'description is empty!']
     },
     owner: {

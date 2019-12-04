@@ -7,8 +7,10 @@ const mongoose = require('mongoose');
 const app = express();
 const server = createServer(app);
 
-app.use('', require('./routes'));
+app.use('/api', require('./routes'));
+app.use('/api/posts', require('./routes/post'));
 
+mongoose.Promise = global.Promise;
 async function init() {
     try {
         const con = await mongoose.connect('mongodb://localhost:27017/blog_post_api', {
