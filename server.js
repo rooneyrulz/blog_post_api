@@ -7,8 +7,14 @@ const mongoose = require('mongoose');
 const app = express();
 const server = createServer(app);
 
+app.use(express.urlencoded({
+    extended: false
+}));
+app.use(express.json());
+
 app.use('/api', require('./routes'));
 app.use('/api/posts', require('./routes/post'));
+app.use('/api/users', require('./routes/auth'));
 
 mongoose.Promise = global.Promise;
 async function init() {
