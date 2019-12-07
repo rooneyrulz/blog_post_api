@@ -3,9 +3,15 @@ const {
     createServer
 } = require('http');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const logger = require('morgan');
+
+dotenv.config();
 
 const app = express();
 const server = createServer(app);
+
+if (process.env.NODE_ENV === 'development') app.use(logger('dev'));
 
 app.use(express.urlencoded({
     extended: false
@@ -19,11 +25,11 @@ app.use('/api/users', require('./routes/auth'));
 mongoose.Promise = global.Promise;
 async function init() {
     try {
-        const con = await mongoose.connect('mongodb://localhost:27017/blog_post_api', {
+        const con = await mongoose.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
             useCreateIndex: true,
             useFindAndModify: true
-        })
+        });
         if (con) console.log('connecting to mongodb!')
     } catch (error) {
         throw error.message

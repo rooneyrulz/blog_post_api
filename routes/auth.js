@@ -7,6 +7,7 @@ const {
 } = require('jsonwebtoken');
 
 const User = require('../models/User');
+const isAuth = require('../middlewares/auth');
 
 const router = Router({
     strict: true
@@ -48,7 +49,7 @@ router.post('/', async (req, res, next) => {
 
         const token = sign({
             id: isSaved._id
-        }, 'MYTOKEN', {
+        }, process.env.JWT_KEY, {
             expiresIn: 360000
         });
         const payload = {
@@ -86,7 +87,7 @@ router.post('/auth', async (req, res, next) => {
 
         const token = sign({
             id: user._id
-        }, 'MY_TOKEN', {
+        }, process.env.JWT_KEY, {
             expiresIn: 360000
         });
         const payload = {
@@ -104,6 +105,16 @@ router.post('/auth', async (req, res, next) => {
 // @ROUTE               >   POST  /api/users/auth/user
 // @DESC                >   GET AUTHENTICATE USER
 // @ACCESS CONTROL      >   PRIVATE
+router.get('/auth/user', isAuth, async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id).exec();
+        if (!user) return res.status(401).send('You are unauthorized!');
 
+        return res.status(200).json(user);
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).send('Something went wrong!');
+    }
+});
 
 module.exports = router;

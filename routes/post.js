@@ -4,6 +4,7 @@ const {
 
 const Post = require('../models/Post');
 const User = require('../models/User');
+const isAuth = require('../middlewares/auth');
 
 const router = Router({
     strict: 'true'
@@ -48,21 +49,28 @@ router.get('/:id', async (req, res, next) => {
 // @ROUTE           >  POST  /api/posts
 // @DESC            >  ADD POSTS
 // @ACCESS CONTROL  >  PRIVATE
-router.post('/', (req, res, next) => {
+router.post('/', isAuth, async (req, res, next) => {
     let post;
     const {
         title,
         description
     } = req.body;
-    if (!title || !description) return res.status(400).send('Invalid fields!');
 
+    if (!title || !description) return res.status(400).send('Invalid fields!');
     try {
+        const user = await User.findById(req.user.id).exec();
+        if (!user) return res.status(400).send('No user found, You are not authorized!');
+
         post = new Post({
             title,
             description,
-            owner: null
+            owner: req.user.id
         });
-        post = post.save();
+        post = await post.save();
+
+        user.posts.push(post);
+        await user.save();
+
         return res.status(201).json(post);
     } catch (error) {
         console.log(error.message);
@@ -74,6 +82,7 @@ router.post('/', (req, res, next) => {
 // @ROUTE           >  PATCH  /api/posts
 // @DESC            >  UPDATE EXISTING POST
 // @ACCESS CONTROL  >  PRIVATE
+
 
 
 module.exports = router;
